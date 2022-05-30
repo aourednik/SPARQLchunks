@@ -15,7 +15,7 @@ Endpoints can be reached from behind corporate firewalls thanks to automatic pro
 ## Installation
 
 ```{r, eval = FALSE}
-install_github("aourednik/SPARQLchunks")
+remotes::install_github("aourednik/SPARQLchunks")
 ```
 
 ## Use
