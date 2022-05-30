@@ -1,10 +1,10 @@
 Package: SPARQLchunks
-Title: What the Package Does (One Line, Title Case)
+Title: Run SPARQL chunks and inline functions to retrieve data
 Version: 0.1.0
 Authors@R: 
     person("Andre", "Ourednik", , "andre.ourednik@epfl.ch", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0309-8715"))
-Description: Allows to run SPARQL chunks in R-markdown files. Also privides inline functions to send a SPARQL query to an endpoint and retrieve data in dataframe or list form. 
+Description: Allows to run SPARQL chunks in R-markdown files. Also provides inline functions to send a SPARQL query to an endpoint and retrieve data in dataframe or list form. 
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

@@ -43,7 +43,9 @@ eng_sparql <- function(options) {
   }
   chunkout <- ifelse(!is.null(varname),qm,out)
   text <- paste("The SPARQL query returned",nresults,"results")
-  if (!is.null(varname)) assign(varname, out, envir = knitr::knit_global())
+  if (!is.null(varname)) {
+  	assign(varname, out, envir = knitr::knit_global())
+  }
   knitr::engine_output(options, options$code, chunkout, extra=text)
 }
 

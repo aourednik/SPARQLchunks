@@ -5,6 +5,9 @@
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
+
+Knowing how to code R is useless if you don't have interesting research questions; and even the best questions remain unanswered without data. RStudio provides a number of convenient ways to access data, among which the possibility to write SQL code chunks in Rmarkdown, to run these chunks and to assign the value of the query result directly to a variable of your choice. No such thing is available yet for SPARQL queries. A shame, if we consider that SPARQL alows you to navigate gigantic knowledge graphs that incarnate the conscience of the semantic web. This is where my SPARQLchunks package comes in. 
+
 This package allows you to query SPARQL endpoints in two different ways: 
 
 1. It allows you to run SPARQL chunks in Rmarkdown files. 
