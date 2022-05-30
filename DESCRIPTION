@@ -18,3 +18,5 @@ Imports:
 VignetteBuilder: knitr
 Suggests: 
     rmarkdown
+URL: https://github.com/aourednik/SPARQLchunks
+BugReports: https://github.com/aourednik/SPARQLchunks/issues
