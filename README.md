@@ -5,7 +5,6 @@
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
-
 Coding in R is useless without interesting research questions; and even the best questions remain unanswered without data. RStudio provides a number of convenient ways to access data, among which the possibility to write SQL code chunks in Rmarkdown, to run these chunks and to assign the value of the query result directly to a variable of your choice. No such thing is available yet for SPARQL queries. A shame, if we consider that SPARQL alows you to navigate gigantic knowledge graphs that incarnate the conscience of the semantic web. This is where the SPARQLchunks package steps in. 
 
 This package allows you to query SPARQL endpoints in two different ways: 
@@ -17,15 +16,25 @@ Endpoints can be reached from behind corporate firewalls on Windows machines tha
 
 ## Installation
 
-```{r, eval = FALSE}
+Most users can install by running this command 
+
+```r
 remotes::install_github("aourednik/SPARQLchunks")
+```
+
+If you are behind a corporate firewall on a Windows machine, direct access to GitHub might be blocked. If that is your case, run this installation code instead:
+
+```r
+proxy_url <- curl::ie_get_proxy_for_url("https://github.com")
+httr::set_config(httr::use_proxy(proxy_url))
+remotes::install_url("https://github.com/aourednik/SPARQLchunks/archive/refs/heads/master.zip")
 ```
 
 ## Use
 
 To use the full potential of the package you need to load the library and _tell knitr that a SPARQL engine exists_: 
 
-```{r setup, eval=FALSE}
+```{r setup, include=FALSE}
 library(SPARQLchunks)
 knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)
 ```

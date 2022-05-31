@@ -25,15 +25,25 @@ Endpoints can be reached from behind corporate firewalls on Windows machines tha
 
 ## Installation
 
-```{r, eval = FALSE}
+Most users can install by running this command 
+
+```{r, include = FALSE}
 install_github("aourednik/SPARQLchunks")
+```
+
+If you are behind a corporate firewall on a Windows machine, direct access to GitHub might be blocked. If that is your case, run this installation code instead:
+
+```r
+proxy_url <- curl::ie_get_proxy_for_url("https://github.com")
+httr::set_config(httr::use_proxy(proxy_url))
+remotes::install_url("https://github.com/aourednik/SPARQLchunks/archive/refs/heads/master.zip")
 ```
 
 ## Use
 
 To use the full potential of the package you need to load the library and _tell knitr that a SPARQL engine exists_: 
 
-```{r setup, eval=FALSE}
+```{r setup, include=FALSE}
 library(SPARQLchunks)
 knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)
 ```
