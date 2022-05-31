@@ -18,10 +18,10 @@ knitr::opts_chunk$set(
 
 This package allows you to query SPARQL endpoints in two different ways: 
 
-1. It allows you to run SPARQL chunks in Rmarkdown files. 
-2. It provides inline functions to send a SPARQL queries to a user-defined endpoint and retrieve data in _dataframe_ form (`sparql2df`) or _list_ form (`sparql2list`). 
+1. Run SPARQL chunks in Rmarkdown files. 
+2. Use inline functions to send SPARQL queries to a user-defined endpoint and retrieve data in _dataframe_ form (`sparql2df`) or _list_ form (`sparql2list`). 
 
-Endpoints can be reached from behind corporate firewalls thanks to automatic proxy detection. See [Execute SPARQL chunks in R Markdown](https://ourednik.info/maps/2021/12/14/execute-sparql-chunks-in-r-markdown/).
+Endpoints can be reached from behind corporate firewalls on Windows machines thanks to automatic proxy detection. See [Execute SPARQL chunks in R Markdown](https://ourednik.info/maps/2021/12/14/execute-sparql-chunks-in-r-markdown/).
 
 ## Installation
 
@@ -61,14 +61,14 @@ SELECT * WHERE {
 
 ####  Retrieve a list
 
-_output.var_: the name of the data.frame you want to store the results in
+_output.var_: the name of the list you want to store the results in
 
 _endpoint_: the URL of the SPARQL endpoint
 
-_output.type_ : if set to "list", retrieves a list (tree structure) instead of a data-frame 
+_output.type_ : when set to "list", retrieves a list (tree structure) instead of a dataframe 
 
 ````markdown
-`r ''````{sparql output.var="queryres_csv", endpoint="https://lindas.admin.ch/query"}
+`r ''````{sparql output.var="queryres_list", endpoint="https://lindas.admin.ch/query", output.type="list"}
 PREFIX schema: <http://schema.org/>
 SELECT * WHERE {
   ?sub a schema:DataCatalog .
