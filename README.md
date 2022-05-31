@@ -5,7 +5,7 @@
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
-Coding in R is useless without interesting research questions; and even the best questions remain unanswered without data. RStudio provides a number of convenient ways to access data, among which the possibility to write SQL code chunks in Rmarkdown, to run these chunks and to assign the value of the query result directly to a variable of your choice. No such thing is available yet for SPARQL queries. A shame, if we consider that SPARQL alows you to navigate gigantic knowledge graphs that incarnate the conscience of the semantic web. This is where the SPARQLchunks package steps in. 
+Coding in R is useless without interesting research questions; and even the best questions remain unanswered without data. RStudio provides a number of convenient ways to access data, among which the possibility to write SQL code chunks in Rmarkdown, to run these chunks and to assign the value of the query result directly to a variable of your choice. No such thing is available yet for SPARQL queries: the ones that allow you to navigate gigantic knowledge graphs that incarnate the conscience of the semantic web. This is where the SPARQLchunks package steps in. 
 
 This package allows you to query SPARQL endpoints in two different ways: 
 
@@ -19,7 +19,7 @@ Endpoints can be reached from behind corporate firewalls on Windows machines tha
 Most users can install by running this command 
 
 ```r
-remotes::install_github("aourednik/SPARQLchunks")
+remotes::install_github("aourednik/SPARQLchunks", build_vignettes = TRUE)
 ```
 
 If you are behind a corporate firewall on a Windows machine, direct access to GitHub might be blocked. If that is your case, run this installation code instead:
@@ -27,7 +27,7 @@ If you are behind a corporate firewall on a Windows machine, direct access to Gi
 ```r
 proxy_url <- curl::ie_get_proxy_for_url("https://github.com")
 httr::set_config(httr::use_proxy(proxy_url))
-remotes::install_url("https://github.com/aourednik/SPARQLchunks/archive/refs/heads/master.zip")
+remotes::install_url("https://github.com/aourednik/SPARQLchunks/archive/refs/heads/master.zip", build_vignettes = TRUE)
 ```
 
 ## Use
@@ -49,6 +49,7 @@ _output.var_: the name of the data.frame you want to store the results in
 
 _endpoint_: the URL of the SPARQL endpoint
 
+Example 1 (Swiss administration endpoint)
 
 ````markdown
 ```{sparql output.var="queryres_df", endpoint="https://lindas.admin.ch/query"}
@@ -56,6 +57,23 @@ PREFIX schema: <http://schema.org/>
 SELECT * WHERE {
   ?sub a schema:DataCatalog .
   ?subtype a schema:DataType .
+}
+```
+````
+
+Example 2 (WikiData endpoint):
+
+````markdown
+```{sparql output.var="res.df", endpoint="https://query.wikidata.org/sparql"}
+SELECT DISTINCT ?item ?itemLabel ?country ?countryLabel ?linkTo ?linkToLabel
+WHERE {
+    ?item wdt:P1142 ?linkTo .
+    ?linkTo wdt:P31 wd:Q12909644 .
+    VALUES ?type { wd:Q7278  wd:Q24649 }
+    ?item wdt:P31 ?type .
+    ?item wdt:P17 ?country .
+    MINUS { ?item wdt:P576 ?abolitionDate }
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" . }
 }
 ```
 ````

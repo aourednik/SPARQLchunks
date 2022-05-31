@@ -27,7 +27,7 @@ Endpoints can be reached from behind corporate firewalls on Windows machines tha
 
 Most users can install by running this command 
 
-```{r, include = FALSE}
+```r
 install_github("aourednik/SPARQLchunks")
 ```
 
@@ -36,7 +36,7 @@ If you are behind a corporate firewall on a Windows machine, direct access to Gi
 ```r
 proxy_url <- curl::ie_get_proxy_for_url("https://github.com")
 httr::set_config(httr::use_proxy(proxy_url))
-remotes::install_url("https://github.com/aourednik/SPARQLchunks/archive/refs/heads/master.zip")
+install_url("https://github.com/aourednik/SPARQLchunks/archive/refs/heads/master.zip")
 ```
 
 ## Use
@@ -58,6 +58,7 @@ _output.var_: the name of the data.frame you want to store the results in
 
 _endpoint_: the URL of the SPARQL endpoint
 
+Example 1 (Swiss administration endpoint)
 
 ````markdown
 `r ''````{sparql output.var="queryres_csv", endpoint="https://lindas.admin.ch/query"}
@@ -65,6 +66,23 @@ PREFIX schema: <http://schema.org/>
 SELECT * WHERE {
   ?sub a schema:DataCatalog .
   ?subtype a schema:DataType .
+}
+```
+````
+
+Example 2 (WikiData endpoint):
+
+````markdown
+`r ''````{sparql output.var="res.df", endpoint="https://query.wikidata.org/sparql"}
+SELECT DISTINCT ?item ?itemLabel ?country ?countryLabel ?linkTo ?linkToLabel
+WHERE {
+    ?item wdt:P1142 ?linkTo .
+    ?linkTo wdt:P31 wd:Q12909644 .
+    VALUES ?type { wd:Q7278  wd:Q24649 }
+    ?item wdt:P31 ?type .
+    ?item wdt:P17 ?country .
+    MINUS { ?item wdt:P576 ?abolitionDate }
+    SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" . }
 }
 ```
 ````

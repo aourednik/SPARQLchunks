@@ -13,7 +13,7 @@ eng_sparql(options)
 Data in dataframe or list form (depending on options)
 }
 \description{
-This package runs on top of knitr to facilitate communication with \code{sparql}. Run \code{sparql} scripts from R, R Markdown and Quarto document.
+Pointing knitr to this function alows you to run SPARQL chunks from R Markdown: \code{knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)}. Usage is internal.
 }
 \details{
 The \code{sparql} engine can be activated via

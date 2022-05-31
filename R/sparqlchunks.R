@@ -8,7 +8,7 @@
 #'
 #' This will be set within an R Markdown document's setup chunk. Do not use eng_sparql function elsewhere.
 #'
-#' @description This package runs on top of knitr to facilitate communication with `sparql`. Run `sparql` scripts from R, R Markdown and Quarto document.
+#' @description Pointing knitr to this function alows you to run SPARQL chunks from R Markdown: `knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)`. Usage is internal.
 #' @usage eng_sparql(options)
 #' @param options Chunk options, as provided by \code{knitr} during chunk execution. Chunk option for this is \code{sparql}
 #' @return Data in dataframe or list form (depending on options)
@@ -43,9 +43,7 @@ eng_sparql <- function(options) {
   }
   chunkout <- ifelse(!is.null(varname),qm,out)
   text <- paste("The SPARQL query returned",nresults,"results")
-  if (!is.null(varname)) {
-  	assign(varname, out, envir = knitr::knit_global())
-  }
+  if (!is.null(varname)) assign(varname, out, envir = knitr::knit_global())
   knitr::engine_output(options, options$code, chunkout, extra=text)
 }
 
