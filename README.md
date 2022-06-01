@@ -43,7 +43,7 @@ Once you have done so, you can run SPARQL chunks:
 
 ### Chunks
 
-#### Retrieve a dataframe
+#### Retrieve a data frame
 
 _output.var_: the name of the data.frame you want to store the results in
 
@@ -98,7 +98,7 @@ SELECT * WHERE {
 
 ### Inline code
 
-In all cases, you need to define an endpoint and prepare a SPQRQL query. Queries can be multi-line:
+The inline functions `sparql2df` and `sparql2list` both have the same pair of arguments: a _SPARQL endpoint_ and a _SPARQL query_. Queries can be multi-line:
 
 ```r
 endpoint <- "https://lindas.admin.ch/query"
@@ -116,8 +116,7 @@ query <- "PREFIX schema: <http://schema.org/>
 result_df <- sparql2df(endpoint,query)
 ```
 
-
-#### Retrieve a data.frame
+#### Retrieve a data frame
 
 ```r
 result_list <- sparql2list(endpoint,query)

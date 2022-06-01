@@ -23,22 +23,6 @@ This package allows you to query SPARQL endpoints in two different ways:
 
 Endpoints can be reached from behind corporate firewalls on Windows machines thanks to automatic proxy detection. See [Execute SPARQL chunks in R Markdown](https://ourednik.info/maps/2021/12/14/execute-sparql-chunks-in-r-markdown/).
 
-## Installation
-
-Most users can install by running this command 
-
-```r
-install_github("aourednik/SPARQLchunks")
-```
-
-If you are behind a corporate firewall on a Windows machine, direct access to GitHub might be blocked. If that is your case, run this installation code instead:
-
-```r
-proxy_url <- curl::ie_get_proxy_for_url("https://github.com")
-httr::set_config(httr::use_proxy(proxy_url))
-install_url("https://github.com/aourednik/SPARQLchunks/archive/refs/heads/master.zip")
-```
-
 ## Use
 
 To use the full potential of the package you need to load the library and _tell knitr that a SPARQL engine exists_: 
@@ -52,7 +36,7 @@ Once you have done so, you can run SPARQL chunks:
 
 ### Chunks
 
-#### Retrieve a dataframe
+#### Retrieve a data frame
 
 _output.var_: the name of the data.frame you want to store the results in
 
@@ -107,7 +91,7 @@ SELECT * WHERE {
 
 ### Inline code
 
-In all cases, you need to define an endpoint and prepare a SPQRQL query. Queries can be multi-line:
+The inline functions `sparql2df` and `sparql2list` both have the same pair of arguments: a _SPARQL endpoint_ and a _SPARQL query_. Queries can be multi-line:
 
 ```{r, eval=FALSE}
 endpoint <- "https://lindas.admin.ch/query"
@@ -118,18 +102,15 @@ query <- "PREFIX schema: <http://schema.org/>
 }"
 ```
 
-
-#### Retrieve a data.grame
+#### Retrieve a data frame
 
 ```{r, eval=FALSE}
 result_df <- sparql2df(endpoint,query)
 ```
-
 
 #### Retrieve a list
 
 ```{r, eval=FALSE}
 result_list <- sparql2list(endpoint,query)
 ```
-
 
