@@ -32,8 +32,18 @@ eng_sparql <- function(options) {
     output_type <- options$output.type
   }
   if (output_type=="list") {
-    out <- httr::GET(qm,proxy_config, httr::timeout(60)) %>% xml2::read_xml() %>% xml2::as_list()
-    nresults <- length(out$sparql$results)
+  	out <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/xml")))
+  	outcontent <- httr::content(out,"text", encoding = "UTF-8")
+  	if (nchar(outcontent) < 1) {
+  		warning("The query result is empty. Trying without 'text/xml' header. The result is not guaranteed to be a list.")
+  		out <- httr::GET(qm,proxy_config, httr::timeout(60))
+  		outcontent <- httr::content(out,"text", encoding = "UTF-8")
+  		if (nchar(outcontent) < 1) {
+  			warning("The query result is still empty")
+  		}
+  	}
+  	out <- xml2::read_xml(outcontent) %>% xml2::as_list()
+  	nresults <- length(out$sparql$results)
   } else {
     queryres_csv <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/csv")))
     out <- rawToChar(queryres_csv$content)
@@ -86,8 +96,18 @@ sparql2list <- function(endpoint,query) {
 	proxy_url <- curl::ie_get_proxy_for_url(endpoint)
 	proxy_config <- httr::use_proxy(url=proxy_url)
 	qm <- paste(endpoint, "?", "query", "=", gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "", sep = "")
-	out <- httr::GET(qm,proxy_config, httr::timeout(60)) %>% xml2::read_xml() %>% xml2::as_list()
-	return(out)
+	out <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/xml")))
+	outcontent <- httr::content(out,"text", encoding = "UTF-8")
+	if (nchar(outcontent) < 1) {
+		warning("The query result is empty. Trying without 'text/xml' header. The result is not guaranteed to be a list.")
+		out <- httr::GET(qm,proxy_config, httr::timeout(60))
+		outcontent <- httr::content(out,"text", encoding = "UTF-8")
+		if (nchar(outcontent) < 1) {
+			warning("The query result is still empty")
+		}
+	}
+	list <- xml2::read_xml(outcontent) %>% xml2::as_list()
+	return(list)
 }
 
 .onAttach <- function(libname, pkgname) {

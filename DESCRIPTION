@@ -1,6 +1,6 @@
 Package: SPARQLchunks
 Title: Run SPARQL Chunks and Inline Functions to Retrieve Data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Andre", "Ourednik", , "andre.ourednik@epfl.ch", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0309-8715"))
