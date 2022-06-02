@@ -21,10 +21,9 @@
 #' @export
 eng_sparql <- function(options) {
   code <- paste(options$code, collapse = '\n')
-  ep<- options$endpoint
+  ep <- options$endpoint
+  if (!is.null(options$autoproxy)) {autoproxy<-options$autoproxy} else {autoproxy<-FALSE}
   qm <- paste(ep, "?", "query", "=", gsub("\\+", "%2B", utils::URLencode(code, reserved = TRUE)), "", sep = "")
-  proxy_url <- curl::ie_get_proxy_for_url(ep)
-  proxy_config <- httr::use_proxy(url=proxy_url)
   varname <- options$output.var
   if(is.null(options$output.type)) {
     output_type <- "dataframe"
@@ -32,34 +31,22 @@ eng_sparql <- function(options) {
     output_type <- options$output.type
   }
   if (output_type=="list") {
-  	out <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/xml")))
-  	outcontent <- httr::content(out,"text", encoding = "UTF-8")
-  	if (nchar(outcontent) < 1) {
-  		warning("The query result is empty. Trying without 'text/xml' header. The result is not guaranteed to be a list.")
-  		out <- httr::GET(qm,proxy_config, httr::timeout(60))
-  		outcontent <- httr::content(out,"text", encoding = "UTF-8")
-  		if (nchar(outcontent) < 1) {
-  			warning("The query result is still empty")
-  		}
-  	}
-  	out <- xml2::read_xml(outcontent) %>% xml2::as_list()
+  	out <- sparql2list(ep,code,autoproxy)
   	nresults <- length(out$sparql$results)
   } else {
-    queryres_csv <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/csv")))
-    out <- rawToChar(queryres_csv$content)
-    out <- textConnection(out)
-    out <- utils::read.csv(out)
+    out <- sparql2df(ep,code,autoproxy)
     nresults <- nrow(out)
   }
   chunkout <- ifelse(!is.null(varname),qm,out)
-  text <- paste("The SPARQL query returned",nresults,"results")
+  message(paste("The SPARQL query returned",nresults,"results"))
   if (!is.null(varname)) assign(varname, out, envir = knitr::knit_global())
-  knitr::engine_output(options, options$code, chunkout, extra=text)
+  knitr::engine_output(options, options$code, chunkout)
 }
 
 #' Fetch data from a SPARQL endpoint and store the output in a dataframe
 #' @param endpoint The SPARQL endpoint (a URL)
 #' @param query The SPARQL query (character)
+#' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
 #' @examples library(SPARQLchunks)
 #' endpoint <- "https://lindas.admin.ch/query"
 #' query <- "PREFIX schema: <http://schema.org/>
@@ -69,20 +56,35 @@ eng_sparql <- function(options) {
 #' }"
 #' result_df <- sparql2df(endpoint,query)
 #' @export
-sparql2df <- function(endpoint,query) {
-	proxy_url <- curl::ie_get_proxy_for_url(endpoint)
-	proxy_config <- httr::use_proxy(url=proxy_url)
+sparql2df <- function(endpoint,query,autoproxy=FALSE) {
+	if (autoproxy) {
+		message("Trying to determine proxy parameters")
+		proxy_url <- curl::ie_get_proxy_for_url(endpoint)
+		if (! is.null(proxy_url)) message(paste("Using proxy:", proxy_url)) else {message(paste("No proxy found or needed to access the endpoint",endpoint))}
+		proxy_config <- httr::use_proxy(url=proxy_url)
+	} else {
+		proxy_config <- httr::use_proxy(url=NULL)
+	}
 	qm <- paste(endpoint, "?", "query", "=", gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "", sep = "")
-	queryres_csv <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/csv")))
-	out <- rawToChar(queryres_csv$content)
-	out <- textConnection(out)
-	out <- utils::read.csv(out)
-	return(out)
+	out <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/csv")))
+	outcontent <- httr::content(out,"text", encoding = "UTF-8")
+	if (nchar(outcontent) < 1) {
+		warning("The query result is empty. Trying without 'text/csv' header. The result is not guaranteed to be a data frame.")
+		out <- httr::GET(qm,proxy_config, httr::timeout(60))
+		outcontent <- httr::content(out,"text", encoding = "UTF-8")
+		if (nchar(outcontent) < 1) {
+			warning("The query result is still empty")
+		}
+	}
+	out <- textConnection(outcontent)
+	df <- utils::read.csv(out)
+	return(df)
 }
 
 #' Fetch data from a SPARQL endpoint and store the output in a list
 #' @param endpoint The SPARQL endpoint (a URL)
 #' @param query The SPARQL query (character)
+#' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
 #' @examples library(SPARQLchunks)
 #' endpoint <- "https://lindas.admin.ch/query"
 #' query <- "PREFIX schema: <http://schema.org/>
@@ -92,14 +94,20 @@ sparql2df <- function(endpoint,query) {
 #' }"
 #' result_list <- sparql2list(endpoint,query)
 #' @export
-sparql2list <- function(endpoint,query) {
-	proxy_url <- curl::ie_get_proxy_for_url(endpoint)
-	proxy_config <- httr::use_proxy(url=proxy_url)
+sparql2list <- function(endpoint,query, autoproxy=FALSE) {
+	if (autoproxy) {
+		print("Trying to determine proxy parameters")
+		proxy_url <- curl::ie_get_proxy_for_url(endpoint)
+		if (! is.null(proxy_url)) print(paste("Using proxy:", proxy_url)) else {print(paste("No proxy found or needed to access the endpoint",endpoint))}
+		proxy_config <- httr::use_proxy(url=proxy_url)
+	} else {
+		proxy_config <- httr::use_proxy(url=NULL)
+	}
 	qm <- paste(endpoint, "?", "query", "=", gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "", sep = "")
 	out <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/xml")))
 	outcontent <- httr::content(out,"text", encoding = "UTF-8")
 	if (nchar(outcontent) < 1) {
-		warning("The query result is empty. Trying without 'text/xml' header. The result is not guaranteed to be a list.")
+		warning("First query attempt result is empty. Trying without 'text/xml' header. The result is not guaranteed to be a list.")
 		out <- httr::GET(qm,proxy_config, httr::timeout(60))
 		outcontent <- httr::content(out,"text", encoding = "UTF-8")
 		if (nchar(outcontent) < 1) {

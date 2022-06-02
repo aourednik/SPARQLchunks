@@ -4,12 +4,14 @@
 \alias{sparql2df}
 \title{Fetch data from a SPARQL endpoint and store the output in a dataframe}
 \usage{
-sparql2df(endpoint, query)
+sparql2df(endpoint, query, autoproxy = FALSE)
 }
 \arguments{
 \item{endpoint}{The SPARQL endpoint (a URL)}
 
 \item{query}{The SPARQL query (character)}
+
+\item{autoproxy}{Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls}
 }
 \description{
 Fetch data from a SPARQL endpoint and store the output in a dataframe

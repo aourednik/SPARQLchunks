@@ -45,9 +45,11 @@ Once you have done so, you can run SPARQL chunks:
 
 #### Retrieve a data frame
 
-_output.var_: the name of the data.frame you want to store the results in
+_output.var_: the name of the data frame you want to store the results in
 
 _endpoint_: the URL of the SPARQL endpoint
+
+_autoproxy_: whether or not try to use the automatic proxy detection
 
 Example 1 (Swiss administration endpoint)
 
@@ -61,7 +63,22 @@ SELECT * WHERE {
 ```
 ````
 
-Example 2 (WikiData endpoint):
+Example 2 (Uniprot endpoint)
+
+Note the use of attempt at automatic proxy detection. 
+
+````markdown
+```{sparql output.var="tes5", endpoint="https://sparql.uniprot.org/sparql", autoproxy=TRUE}
+PREFIX up: <http://purl.uniprot.org/core/>
+SELECT ?taxon
+FROM <http://sparql.uniprot.org/taxonomy>
+WHERE {
+	?taxon a up:Taxon .
+} LIMIT 500
+```
+````
+
+Example 3 (WikiData endpoint):
 
 ````markdown
 ```{sparql output.var="res.df", endpoint="https://query.wikidata.org/sparql"}
@@ -78,6 +95,7 @@ WHERE {
 ```
 ````
 
+
 ####  Retrieve a list
 
 _output.var_: the name of the list you want to store the results in
@@ -85,6 +103,8 @@ _output.var_: the name of the list you want to store the results in
 _endpoint_: the URL of the SPARQL endpoint
 
 _output.type_ : when set to "list", retrieves a list (tree structure) instead of a data-frame 
+
+_autoproxy_: whether or not try to use the automatic proxy detection
 
 ````markdown
 ```{sparql output.var="queryres_list", endpoint="https://lindas.admin.ch/query", output.type="list"}
@@ -109,15 +129,26 @@ query <- "PREFIX schema: <http://schema.org/>
 }"
 ```
 
-
-#### Retrieve a list
+#### Retrieve a data frame
 
 ```r
 result_df <- sparql2df(endpoint,query)
 ```
 
-#### Retrieve a data frame
+The same but with attempt at automatic proxy detection:
+
+```r
+result_df <- sparql2df(endpoint,query,autoproxy=TRUE)
+```
+
+#### Retrieve a list
 
 ```r
 result_list <- sparql2list(endpoint,query)
+```
+
+The same but with attempt at automatic proxy detection:
+
+```r
+result_list <- sparql2list(endpoint,query,autoproxy=TRUE)
 ```

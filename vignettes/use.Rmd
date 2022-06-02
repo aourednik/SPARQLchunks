@@ -42,6 +42,8 @@ _output.var_: the name of the data.frame you want to store the results in
 
 _endpoint_: the URL of the SPARQL endpoint
 
+_autoproxy_: whether or not try to use the automatic proxy detection
+
 Example 1 (Swiss administration endpoint)
 
 ````markdown
@@ -54,7 +56,22 @@ SELECT * WHERE {
 ```
 ````
 
-Example 2 (WikiData endpoint):
+Example 2 (Uniprot endpoint)
+
+Note the use of attempt at automatic proxy detection. 
+
+````markdown
+`r ''````{sparql output.var="tes5", endpoint="https://sparql.uniprot.org/sparql", autoproxy=TRUE}
+PREFIX up: <http://purl.uniprot.org/core/>
+SELECT ?taxon
+FROM <http://sparql.uniprot.org/taxonomy>
+WHERE {
+	?taxon a up:Taxon .
+} LIMIT 500
+```
+````
+
+Example 3 (WikiData endpoint):
 
 ````markdown
 `r ''````{sparql output.var="res.df", endpoint="https://query.wikidata.org/sparql"}
@@ -78,6 +95,8 @@ _output.var_: the name of the list you want to store the results in
 _endpoint_: the URL of the SPARQL endpoint
 
 _output.type_ : when set to "list", retrieves a list (tree structure) instead of a dataframe 
+
+_autoproxy_: whether or not try to use the automatic proxy detection
 
 ````markdown
 `r ''````{sparql output.var="queryres_list", endpoint="https://lindas.admin.ch/query", output.type="list"}
@@ -108,9 +127,20 @@ query <- "PREFIX schema: <http://schema.org/>
 result_df <- sparql2df(endpoint,query)
 ```
 
+The same but with attempt at automatic proxy detection:
+
+```{r, eval=FALSE}
+result_df <- sparql2df(endpoint,query,autoproxy=TRUE)
+```
+
 #### Retrieve a list
 
 ```{r, eval=FALSE}
 result_list <- sparql2list(endpoint,query)
 ```
 
+The same but with attempt at automatic proxy detection:
+
+```{r, eval=FALSE}
+result_list <- sparql2list(endpoint,query,autoproxy=TRUE)
+```

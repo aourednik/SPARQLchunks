@@ -4,12 +4,14 @@
 \alias{sparql2list}
 \title{Fetch data from a SPARQL endpoint and store the output in a list}
 \usage{
-sparql2list(endpoint, query)
+sparql2list(endpoint, query, autoproxy = FALSE)
 }
 \arguments{
 \item{endpoint}{The SPARQL endpoint (a URL)}
 
 \item{query}{The SPARQL query (character)}
+
+\item{autoproxy}{Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls}
 }
 \description{
 Fetch data from a SPARQL endpoint and store the output in a list
