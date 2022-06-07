@@ -58,31 +58,19 @@ eng_sparql <- function(options) {
 #' @export
 sparql2df <- function(endpoint,query,autoproxy=FALSE) {
 	if (autoproxy) {
-		message("Trying to determine proxy parameters")
-		proxy_url <- curl::ie_get_proxy_for_url(endpoint)
-		if (! is.null(proxy_url)) message(paste("Using proxy:", proxy_url)) else {message(paste("No proxy found or needed to access the endpoint",endpoint))}
-		proxy_config <- httr::use_proxy(url=proxy_url)
+		proxy_config <- autoproxyconfig(endpoint)
 	} else {
 		proxy_config <- httr::use_proxy(url=NULL)
 	}
-	qm <- paste(endpoint, "?", "query", "=", gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "", sep = "")
-	out <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/csv")))
-	outcontent <- httr::content(out,"text", encoding = "UTF-8")
-	if (nchar(outcontent) < 1) {
-		warning("The query result is empty. Trying without 'text/csv' header. The result is not guaranteed to be a data frame.")
-		out <- httr::GET(qm,proxy_config, httr::timeout(60))
-		outcontent <- httr::content(out,"text", encoding = "UTF-8")
-		if (nchar(outcontent) < 1) {
-			warning("The query result is still empty")
-		}
-	}
+	acceptype <- "text/csv"
+	outcontent <- get_outcontent(endpoint,query,acceptype,proxy_config)
 	out <- textConnection(outcontent)
 	df <- utils::read.csv(out)
 	return(df)
 }
 
 #' Fetch data from a SPARQL endpoint and store the output in a list
-#' @param endpoint The SPARQL endpoint (a URL)
+#' @param endpoint The SPARQL endpoint (URL)
 #' @param query The SPARQL query (character)
 #' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
 #' @examples library(SPARQLchunks)
@@ -96,26 +84,77 @@ sparql2df <- function(endpoint,query,autoproxy=FALSE) {
 #' @export
 sparql2list <- function(endpoint,query, autoproxy=FALSE) {
 	if (autoproxy) {
-		print("Trying to determine proxy parameters")
-		proxy_url <- curl::ie_get_proxy_for_url(endpoint)
-		if (! is.null(proxy_url)) print(paste("Using proxy:", proxy_url)) else {print(paste("No proxy found or needed to access the endpoint",endpoint))}
-		proxy_config <- httr::use_proxy(url=proxy_url)
+		proxy_config <- autoproxyconfig(endpoint)
 	} else {
 		proxy_config <- httr::use_proxy(url=NULL)
 	}
+	acceptype <- "text/xml"
+	outcontent <- get_outcontent(endpoint,query,acceptype,proxy_config)
+	list <- xml2::read_xml(outcontent) %>% xml2::as_list()
+	return(list)
+}
+
+#' Try to determine the proxy settings automatically
+#' @param endpoint The SPARQL endpoint (URL)
+autoproxyconfig <- function(endpoint){
+	message("Trying to determine proxy parameters")
+	proxy_url <- tryCatch(
+		{curl::ie_get_proxy_for_url(endpoint)},
+		error = function(e) {
+			message("Automatic proxy detection with curl::curl::ie_get_proxy_for_url() failed.")
+			return(NULL)
+		}
+	)
+	if (! is.null(proxy_url)) message(paste("Using proxy:", proxy_url)) else {message(paste("No proxy found or needed to access the endpoint",endpoint))}
+	return(httr::use_proxy(url=proxy_url))
+}
+
+#' Get the content from the endpoint
+#' @param endpoint The SPARQL endpoint (URL)
+#' @param query The SPARQL query (character)
+#' @param acceptype "text/csv" or "text/xml" (character)
+#' @param proxy_config Detected proxy configuration (list)
+get_outcontent <- function(endpoint,query,acceptype,proxy_config){
 	qm <- paste(endpoint, "?", "query", "=", gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "", sep = "")
-	out <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = "text/xml")))
-	outcontent <- httr::content(out,"text", encoding = "UTF-8")
+	outcontent <- tryCatch(
+		{
+			out <- httr::GET(qm,proxy_config, httr::timeout(60), httr::add_headers(c(Accept = acceptype)))
+			httr::content(out,"text", encoding = "UTF-8")
+		},
+		error = function(e) {
+			# @see https://github.com/r-lib/httr/issues/417
+			# The download.file function in base R uses IE settings, including proxy password, when you use download method wininet which is now the default on windows.
+			if (.Platform$OS.type == "windows") {
+				tempfile <- file.path(tempdir(), "temp.txt")
+				utils::download.file(qm, method="wininet", headers=c(Accept = acceptype), tempfile)
+				temp <- paste(readLines(tempfile), collapse="\n")
+				unlink(tempfile)
+				return(temp)
+			}
+		}
+	)
 	if (nchar(outcontent) < 1) {
-		warning("First query attempt result is empty. Trying without 'text/xml' header. The result is not guaranteed to be a list.")
-		out <- httr::GET(qm,proxy_config, httr::timeout(60))
-		outcontent <- httr::content(out,"text", encoding = "UTF-8")
+		warning(paste0("First query attempt result is empty. Trying without '", acceptype ,"' header. The result is not guaranteed to be a list."))
+		outcontent <- tryCatch(
+			{
+				out <- httr::GET(qm,proxy_config, httr::timeout(60))
+				httr::content(out,"text", encoding = "UTF-8")
+			},
+			error = function(e) {
+				if (.Platform$OS.type == "windows") {
+					tempfile <- file.path(tempdir(), "temp.txt")
+					utils::download.file(qm, method="wininet", tempfile)
+					temp <- paste(readLines(tempfile), collapse="\n")
+					unlink(tempfile)
+					return(temp)
+				}
+			}
+		)
 		if (nchar(outcontent) < 1) {
 			warning("The query result is still empty")
 		}
 	}
-	list <- xml2::read_xml(outcontent) %>% xml2::as_list()
-	return(list)
+	return(outcontent)
 }
 
 .onAttach <- function(libname, pkgname) {

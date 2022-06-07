@@ -7,7 +7,7 @@
 sparql2list(endpoint, query, autoproxy = FALSE)
 }
 \arguments{
-\item{endpoint}{The SPARQL endpoint (a URL)}
+\item{endpoint}{The SPARQL endpoint (URL)}
 
 \item{query}{The SPARQL query (character)}
 
