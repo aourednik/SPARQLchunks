@@ -126,12 +126,17 @@ autoproxyconfig <- function(endpoint) {
 #' @param proxy_config Detected proxy configuration (list)
 get_outcontent <- function(endpoint, query, acceptype, proxy_config) {
     qm <- paste(endpoint, "?", "query", "=",
-    						gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "", sep = "")
+    						gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "",
+    						sep = "")
+    authenticate <- httr::authenticate(user = Sys.getenv("SSZ_VIEWS_USER"),
+    																	 password = Sys.getenv("SSZ_VIEWS_PW"))
     outcontent <- tryCatch({
         out <- httr::GET(qm,
-        								 proxy_config,
+        								 proxy_config, authenticate,
         								 httr::timeout(60),
         								 httr::add_headers(c(Accept = acceptype)))
+        httr::warn_for_status(out)
+        #browser()
         httr::content(out, "text", encoding = "UTF-8")
     }, error = function(e) {
         # @see https://github.com/r-lib/httr/issues/417 The download.file function in base R uses IE settings, including proxy password, when you use download
@@ -152,7 +157,11 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config) {
         							 acceptype,
         							 "' header. The result is not guaranteed to be a list."))
         outcontent <- tryCatch({
-            out <- httr::GET(qm, proxy_config, httr::timeout(60))
+            out <- httr::GET(qm,
+            								 proxy_config, authenticate,
+            								 httr::timeout(60))
+            httr::warn_for_status(out)
+            #browser()
             httr::content(out, "text", encoding = "UTF-8")
         }, error = function(e) {
             if (.Platform$OS.type == "windows") {
