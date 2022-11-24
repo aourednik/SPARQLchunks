@@ -54,6 +54,7 @@ eng_sparql <- function(options) {
 #' @param endpoint The SPARQL endpoint (a URL)
 #' @param query The SPARQL query (character)
 #' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
+#' @param auth Authentication Information (httr-authenticate-object)
 #' @examples library(SPARQLchunks)
 #' endpoint <- 'https://lindas.admin.ch/query'
 #' query <- 'PREFIX schema: <http://schema.org/>
@@ -63,14 +64,14 @@ eng_sparql <- function(options) {
 #' }'
 #' result_df <- sparql2df(endpoint, query)
 #' @export
-sparql2df <- function(endpoint, query, autoproxy = FALSE) {
+sparql2df <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
     if (autoproxy) {
         proxy_config <- autoproxyconfig(endpoint)
     } else {
         proxy_config <- httr::use_proxy(url = NULL)
     }
     acceptype <- "text/csv"
-    outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config)
+    outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
     out <- textConnection(outcontent)
     df <- utils::read.csv(out)
     return(df)
@@ -89,7 +90,7 @@ sparql2df <- function(endpoint, query, autoproxy = FALSE) {
 #' }'
 #' result_list <- sparql2list(endpoint, query)
 #' @export
-sparql2list <- function(endpoint, query, autoproxy = FALSE) {
+sparql2list <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
     if (autoproxy) {
         proxy_config <- autoproxyconfig(endpoint)
     } else {
@@ -124,15 +125,15 @@ autoproxyconfig <- function(endpoint) {
 #' @param query The SPARQL query (character)
 #' @param acceptype 'text/csv' or 'text/xml' (character)
 #' @param proxy_config Detected proxy configuration (list)
-get_outcontent <- function(endpoint, query, acceptype, proxy_config) {
+#' @param auth Authentication Information (httr-authenticate-object)
+get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL) {
     qm <- paste(endpoint, "?", "query", "=",
     						gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "",
     						sep = "")
-    authenticate <- httr::authenticate(user = Sys.getenv("SSZ_VIEWS_USER"),
-    																	 password = Sys.getenv("SSZ_VIEWS_PW"))
+
     outcontent <- tryCatch({
         out <- httr::GET(qm,
-        								 proxy_config, authenticate,
+        								 proxy_config, auth,
         								 httr::timeout(60),
         								 httr::add_headers(c(Accept = acceptype)))
         httr::warn_for_status(out)
@@ -158,7 +159,7 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config) {
         							 "' header. The result is not guaranteed to be a list."))
         outcontent <- tryCatch({
             out <- httr::GET(qm,
-            								 proxy_config, authenticate,
+            								 proxy_config, auth,
             								 httr::timeout(60))
             httr::warn_for_status(out)
             #browser()
