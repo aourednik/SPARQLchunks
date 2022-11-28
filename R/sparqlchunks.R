@@ -28,9 +28,9 @@ eng_sparql <- function(options) {
     autoproxy <- FALSE
   }
   if (!is.null(options$auth)) {
-      auth <- options$auth
+    auth <- options$auth
   } else {
-      auth <- FALSE
+    auth <- FALSE
   }
   qm <- paste(ep, "?", "query", "=",
     gsub("\\+", "%2B", utils::URLencode(code, reserved = TRUE)), "",
