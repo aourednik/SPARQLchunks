@@ -3,8 +3,6 @@
 on:
   push:
     paths: ["**.[rR]", "**.[qrR]md", "**.[rR]markdown", "**.[rR]nw"]
-  pull_request:
-    paths: ["**.[rR]", "**.[qrR]md", "**.[rR]markdown", "**.[rR]nw"]
 
 name: Style
 
@@ -27,9 +25,9 @@ jobs:
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::styler
-          needs: styler
-
+          extra-packages:  |
+            any::styler
+            any::roxygen2
       - name: Enable styler cache
         run: styler::cache_activate()
         shell: Rscript {0}
