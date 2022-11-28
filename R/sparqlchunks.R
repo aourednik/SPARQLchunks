@@ -133,7 +133,7 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
 
     outcontent <- tryCatch({
         out <- httr::GET(qm,
-        								 proxy_config, auth,
+                         proxy_config, auth,
         								 httr::timeout(60),
         								 httr::add_headers(c(Accept = acceptype)))
         httr::warn_for_status(out)
