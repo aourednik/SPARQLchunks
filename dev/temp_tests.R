@@ -50,3 +50,6 @@ result_c <- sparql2df(endpoint_c, query_c)
 # result_c does not exist (error 401)
 result_c_auth <- sparql2df(endpoint_c, query_c, auth = authenticate)
 # result_c_auth has 1 variable with 1489 obs.
+
+
+
