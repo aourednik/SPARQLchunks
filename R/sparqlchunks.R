@@ -27,6 +27,11 @@ eng_sparql <- function(options) {
   } else {
     autoproxy <- FALSE
   }
+  if (!is.null(options$auth)) {
+      auth <- options$auth
+  } else {
+      auth <- FALSE
+  }
   qm <- paste(ep, "?", "query", "=",
     gsub("\\+", "%2B", utils::URLencode(code, reserved = TRUE)), "",
     sep = ""
@@ -38,10 +43,10 @@ eng_sparql <- function(options) {
     output_type <- options$output.type
   }
   if (output_type == "list") {
-    out <- sparql2list(ep, code, autoproxy)
+    out <- sparql2list(ep, code, autoproxy, auth)
     nresults <- length(out$sparql$results)
   } else {
-    out <- sparql2df(ep, code, autoproxy)
+    out <- sparql2df(ep, code, autoproxy, auth)
     nresults <- nrow(out)
   }
   chunkout <- ifelse(!is.null(varname), qm, out)
@@ -83,6 +88,7 @@ sparql2df <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
 #' @param endpoint The SPARQL endpoint (URL)
 #' @param query The SPARQL query (character)
 #' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
+#' @param auth Authentication Information (httr-authenticate-object)
 #' @examples library(SPARQLchunks)
 #' endpoint <- "https://lindas.admin.ch/query"
 #' query <- "PREFIX schema: <http://schema.org/>
