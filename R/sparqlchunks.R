@@ -105,7 +105,7 @@ sparql2list <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
     proxy_config <- httr::use_proxy(url = NULL)
   }
   acceptype <- "text/xml"
-  outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config)
+  outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
   list <- xml2::read_xml(outcontent) %>% xml2::as_list()
   return(list)
 }
