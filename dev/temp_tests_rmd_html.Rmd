@@ -6,22 +6,28 @@ output: html_document
 ---
 
 
-# Input Files INT
-
-asdf
+# Settings
 
 
-```{r setup}
+```{r setup, echo=F}
 
 devtools::load_all()
 
 knitr::knit_engines$set(sparql = eng_sparql)
 
+authenticate <- httr::authenticate(user = Sys.getenv("SSZ_VIEWS_USER"),
+																	 password = Sys.getenv("SSZ_VIEWS_PW"))
+
 ```
 
 
+# Testing sparql2df
 
-```{r results="asis"}
+## sparql2df for query a
+
+### without auth information
+
+```{r results="asis", echo=F}
 
   query <- "PREFIX schema: <http://schema.org/>
   PREFIX cube: <https://cube.link/>
@@ -33,17 +39,44 @@ knitr::knit_engines$set(sparql = eng_sparql)
   }"
   
   # Anzahl CubeIDs x Labels, IDs und Labels
-  cubes <- sparql2df("https://int.lindas.admin.ch/query/", query)
-
-print(cubes)
+  result_a_df <- sparql2df("https://int.lindas.admin.ch/query/", query)
 
 ```
 
+The query returns `r nrow(result_a_df)` (should be 209) rows. 
 
-```{r}
-authenticate <- httr::authenticate(user = Sys.getenv("SSZ_VIEWS_USER"),
-																	 password = Sys.getenv("SSZ_VIEWS_PW"))
 
+
+
+
+### with auth information
+
+```{r results="asis", echo=F}
+
+  query <- "PREFIX schema: <http://schema.org/>
+  PREFIX cube: <https://cube.link/>
+  SELECT * 
+  FROM <https://lindas.admin.ch/stadtzuerich/stat>
+  WHERE {
+    ?sub a cube:Cube ;
+      schema:name ?label ;
+  }"
+  
+  # Anzahl CubeIDs x Labels, IDs und Labels
+  result_a_df_auth <- sparql2df("https://int.lindas.admin.ch/query/", query, auth = authenticate)
+
+```
+
+The query returns `r nrow(result_a_df_auth)` (should be 209) rows. 
+
+
+
+
+## sparql2df for query b
+
+### without auth information
+
+```{r results="asis", echo=F}
 
 # This query needs authentication
 endpoint_b <- "https://stardog.cluster.ldbar.ch/ssz-views"
@@ -58,11 +91,56 @@ WHERE {
 } GROUP BY ?cube ORDER BY ?count"
 
 
-result_b_auth <- sparql2df(endpoint_b, query_b, auth = authenticate)
+# result_b_df <- sparql2df(endpoint_b, query_b)
 # result_b_auth has 1 variable with 1363 obs.
-print(result_b_auth)
+# print(length(result_b_df))
 
 
 ```
 
+### with auth information
 
+```{r results="asis", echo=F}
+
+result_b_df_auth <- sparql2df(endpoint_b, query_b, auth = authenticate)
+
+
+```
+
+This query returns in a list of length `r nrow(result_b_df_auth)` (should be 2249) rows. 
+
+
+
+
+
+
+
+## sparql2df for query c
+
+### without auth information
+
+```{r results="asis", echo=F}
+
+# This query needs authentication as well
+endpoint_c <- "https://stardog.cluster.ldbar.ch/ssz-views"
+query_c <- "PREFIX schema: <http://schema.org/>
+PREFIX view: <https://cube.link/view/>
+SELECT * WHERE {
+      ?resource a view:View ;
+                schema:name ?name ;
+                schema:alternateName ?alt .
+}"
+
+
+```
+
+### with auth information
+
+```{r results="asis", echo=F}
+
+result_c_df_auth <- sparql2df(endpoint_c, query_c, auth = authenticate)
+
+
+```
+
+This query returns in a list of length `r nrow(result_c_df_auth)` (should be 2249) rows. 
