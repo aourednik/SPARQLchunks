@@ -4,16 +4,18 @@
 \alias{get_outcontent}
 \title{Get the content from the endpoint}
 \usage{
-get_outcontent(endpoint, query, acceptype, proxy_config)
+get_outcontent(endpoint, query, acceptype, proxy_config, auth = NULL)
 }
 \arguments{
 \item{endpoint}{The SPARQL endpoint (URL)}
 
 \item{query}{The SPARQL query (character)}
 
-\item{acceptype}{"text/csv" or "text/xml" (character)}
+\item{acceptype}{'text/csv' or 'text/xml' (character)}
 
 \item{proxy_config}{Detected proxy configuration (list)}
+
+\item{auth}{Authentication Information (httr-authenticate-object)}
 }
 \description{
 Get the content from the endpoint
