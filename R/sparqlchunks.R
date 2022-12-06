@@ -106,7 +106,15 @@ sparql2list <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
   }
   acceptype <- "text/xml"
   outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
-  list <- xml2::read_xml(outcontent) %>% xml2::as_list()
+  tryCatch(
+    {
+      list <- xml2::read_xml(outcontent) %>% xml2::as_list()
+    },
+    error = function(e) {
+      warning("Query could not be parsetd as xml. Returning unparsed query return values.")
+      list <- outcontent
+    }
+  )
   return(list)
 }
 
