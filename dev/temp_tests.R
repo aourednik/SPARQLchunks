@@ -3,7 +3,7 @@ authenticate <- httr::authenticate(user = Sys.getenv("SSZ_VIEWS_USER"),
 
 
 
-# 1) endpoints and queries
+# 1) endpoints and queries -------------------
 
 # A) This query runs without authentication
 endpoint_a <- "https://lindas.admin.ch/query"
@@ -38,7 +38,7 @@ SELECT * WHERE {
 
 
 
-# 2) test sparql2df
+# 2) test sparql2df --------------------------
 
 result_a_df <- sparql2df(endpoint_a, query_a)
 # result_a_df has 2 variables with 78 observations
@@ -62,7 +62,7 @@ result_c_df_auth <- sparql2df(endpoint_c, query_c, auth = authenticate)
 
 
 
-# 3) test sparql2list
+# 3) test sparql2list -------------------------
 
 result_a_list <- sparql2list(endpoint_a, query_a)
 # result_a_list is a list of 1, sparql>results is a list of 78
@@ -90,7 +90,7 @@ result_c_list_auth <- sparql2list(endpoint_c, query_c, auth = authenticate)
 
 
 
-# 4) test eng_sparql
+# 4) test eng_sparql -----------------------------------
 
 opt_a <- list(code = query_a, endpoint = endpoint_a)
 neu <- eng_sparql(opt_a)

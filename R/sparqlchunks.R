@@ -151,8 +151,6 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
         httr::timeout(60),
         httr::add_headers(c(Accept = acceptype))
       )
-      httr::warn_for_status(out)
-      # browser()
       httr::content(out, "text", encoding = "UTF-8")
     },
     error = function(e) {
@@ -184,8 +182,11 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
           proxy_config, auth,
           httr::timeout(60)
         )
-        httr::warn_for_status(out)
-        # browser()
+        if (out$status == 401){
+          warning("Authentication required. Provide valid authentication with the auth parameter")
+        } else {
+          httr::warn_for_status(out)
+        }
         httr::content(out, "text", encoding = "UTF-8")
       },
       error = function(e) {
