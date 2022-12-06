@@ -182,7 +182,7 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
           proxy_config, auth,
           httr::timeout(60)
         )
-        if (out$status == 401){
+        if (out$status == 401) {
           warning("Authentication required. Provide valid authentication with the auth parameter")
         } else {
           httr::warn_for_status(out)
