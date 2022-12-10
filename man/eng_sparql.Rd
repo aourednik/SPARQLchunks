@@ -16,10 +16,8 @@ Data in dataframe or list form (depending on options)
 Pointing knitr to this function alows you to run SPARQL chunks from R Markdown: \code{knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)}. Usage is internal.
 }
 \details{
-The \code{sparql} engine can be activated via
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)
-}\if{html}{\out{</div>}}
+The \code{sparql} engine can be activated via\preformatted{knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)
+}
 
 This will be set within an R Markdown document's setup chunk. Do not use eng_sparql function elsewhere.
 }

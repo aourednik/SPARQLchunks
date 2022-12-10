@@ -51,6 +51,8 @@ _endpoint_: the URL of the SPARQL endpoint
 
 _autoproxy_: whether or not try to use the automatic proxy detection
 
+_auth_: authentication information for the sparql endpoint (as an httr authentication object, optional)
+
 Example 1 (Swiss administration endpoint)
 
 ````markdown

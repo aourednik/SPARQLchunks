@@ -4,7 +4,7 @@
 \alias{sparql2df}
 \title{Fetch data from a SPARQL endpoint and store the output in a dataframe}
 \usage{
-sparql2df(endpoint, query, autoproxy = FALSE)
+sparql2df(endpoint, query, autoproxy = FALSE, auth = NULL)
 }
 \arguments{
 \item{endpoint}{The SPARQL endpoint (a URL)}
@@ -12,6 +12,8 @@ sparql2df(endpoint, query, autoproxy = FALSE)
 \item{query}{The SPARQL query (character)}
 
 \item{autoproxy}{Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls}
+
+\item{auth}{Authentication Information (httr-authenticate-object)}
 }
 \description{
 Fetch data from a SPARQL endpoint and store the output in a dataframe
@@ -24,5 +26,5 @@ query <- "PREFIX schema: <http://schema.org/>
   ?sub a schema:DataCatalog .
   ?subtype a schema:DataType .
 }"
-result_df <- sparql2df(endpoint,query)
+result_df <- sparql2df(endpoint, query)
 }
