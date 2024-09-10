@@ -1,0 +1,7 @@
+bibentry(
+  bibtype  = "Software",
+  title    = "SPARQLChunks",
+  author   = "André Ourednik",
+  url  = "https://github.com/aourednik/SPARQLchunks",
+  year     = "2024"
+)
