@@ -1,7 +1,12 @@
-bibentry(
-  bibtype  = "Software",
-  title    = "SPARQLChunks",
-  author   = "André Ourednik",
-  url  = "https://github.com/aourednik/SPARQLchunks",
-  year     = "2024"
+citHeader("To cite SPARQLchunks in publications, please use:")
+
+citEntry(
+  entry = "Manual",
+  title = "SPARQLChunks: Query SPARQL endpoints and run SPARQL chunks in R-markdown files.",
+  author = person("André", "Ourednik", email = "andre.ourednik@epfl.ch", role = c("aut", "cre")),
+  year = "2025",
+  note = "R package version 0.3",
+  url = "https://github.com/aourednik/SPARQLchunks"
 )
+
+citFooter("Thank you for citing SPARQLchunks!")

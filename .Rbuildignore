@@ -3,3 +3,4 @@
 ^LICENSE\.md$
 ^dev$
 ^\.github$
+^codemeta\.json$

@@ -79,8 +79,21 @@ sparql2df <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
   }
   acceptype <- "text/csv"
   outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
-  out <- textConnection(outcontent)
-  df <- utils::read.csv(out)
+  out <- textConnection(outcontent$content)
+  tryCatch(
+  	{
+  		df <- utils::read.csv(out)
+  	},
+  	error = function(e) {
+  		# utils::browseURL(outcontent$httpquery)
+  		stop(
+  			sprintf(
+  				"Reply from SPARQL endpoint received but could not convert it to a data.frame.\nVerify the query result in a web browser:\n%s",
+  				outcontent$httpquery
+  			)
+  		)
+  	}
+  )
   return(df)
 }
 
@@ -108,11 +121,11 @@ sparql2list <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
   outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
   tryCatch(
     {
-      list <- xml2::read_xml(outcontent) %>% xml2::as_list()
+      list <- xml2::read_xml(outcontent$content) %>% xml2::as_list()
     },
     error = function(e) {
       warning("Query could not be parsetd as xml. Returning unparsed query return values.")
-      list <- outcontent
+      list <- outcontent$content
     }
   )
   return(list)
@@ -150,14 +163,14 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
     gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "",
     sep = ""
   )
-
   outcontent <- tryCatch(
     {
       out <- httr::GET(
         qm,
         proxy_config, auth,
         httr::timeout(60),
-        httr::add_headers(c(Accept = acceptype))
+        httr::add_headers(c(Accept = acceptype)),
+        httr::user_agent("R client SPARQLChunks")
       )
       httr::content(out, "text", encoding = "UTF-8")
     },
@@ -188,7 +201,8 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
         out <- httr::GET(
           qm,
           proxy_config, auth,
-          httr::timeout(60)
+          httr::timeout(60),
+          httr::user_agent("R client SPARQLChunks")
         )
         if (out$status == 401) {
           warning("Authentication required. Provide valid authentication with the auth parameter")
@@ -211,7 +225,10 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
       warning("The query result is still empty")
     }
   }
-  return(outcontent)
+  return(list(
+  	content = outcontent,
+  	httpquery = qm
+  ))
 }
 
 .onAttach <- function(libname, pkgname) {
