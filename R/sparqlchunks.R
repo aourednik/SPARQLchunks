@@ -190,7 +190,7 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
     },
     error = function(e) {
       # @see https://github.com/r-lib/httr/issues/417
-    	# The download.file function in base R uses IE settings, including proxy password, when you use download
+      # The download.file function in base R uses IE settings, including proxy password, when you use download
       # method wininet which is now the default on windows.
       if (.Platform$OS.type == "windows") {
         tempfile <- file.path(tempdir(), "temp.txt")
