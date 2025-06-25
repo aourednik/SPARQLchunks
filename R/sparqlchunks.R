@@ -62,6 +62,7 @@ eng_sparql <- function(options) {
 #' @param query The SPARQL query (character)
 #' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
 #' @param auth Authentication Information (httr-authenticate-object)
+#' @returns SPARQL query result in data.frame format
 #' @examples library(SPARQLchunks)
 #' endpoint <- "https://lindas.admin.ch/query"
 #' query <- "PREFIX schema: <http://schema.org/>
@@ -102,8 +103,8 @@ sparql2df <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
 #' @param query The SPARQL query (character)
 #' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
 #' @param auth Authentication Information (httr-authenticate-object)
-#' @examples library(SPARQLchunks)
-#' endpoint <- "https://lindas.admin.ch/query"
+#' @returns SPARQL query result in the form of a list
+#' @examples endpoint <- "https://lindas.admin.ch/query"
 #' query <- "PREFIX schema: <http://schema.org/>
 #'   SELECT * WHERE {
 #'   ?sub a schema:DataCatalog .
@@ -133,6 +134,9 @@ sparql2list <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
 
 #' Try to determine the proxy settings automatically
 #' @param endpoint The SPARQL endpoint (URL)
+#' @returns Confirmation of the proxy setting
+#' @examples endpoint <- "https://lindas.admin.ch/query"
+#' proxy_config <- autoproxyconfig(endpoint)
 autoproxyconfig <- function(endpoint) {
   message("Trying to determine proxy parameters")
   proxy_url <- tryCatch(
@@ -158,6 +162,16 @@ autoproxyconfig <- function(endpoint) {
 #' @param acceptype 'text/csv' or 'text/xml' (character)
 #' @param proxy_config Detected proxy configuration (list)
 #' @param auth Authentication Information (httr-authenticate-object)
+#' @returns The result of the SPARQL query as a list or, if this failes, failure message.
+#' @examples endpoint <- "https://lindas.admin.ch/query"
+#' query <- "PREFIX schema: <http://schema.org/>
+#'   SELECT * WHERE {
+#'   ?sub a schema:DataCatalog .
+#'   ?subtype a schema:DataType .
+#' }"
+#' acceptype <- "text/xml"
+#' proxy_config <- httr::use_proxy(url = NULL)
+#' outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config)
 get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL) {
   qm <- paste(endpoint, "?", "query", "=",
     gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "",
@@ -175,7 +189,8 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
       httr::content(out, "text", encoding = "UTF-8")
     },
     error = function(e) {
-      # @see https://github.com/r-lib/httr/issues/417 The download.file function in base R uses IE settings, including proxy password, when you use download
+      # @see https://github.com/r-lib/httr/issues/417
+    	# The download.file function in base R uses IE settings, including proxy password, when you use download
       # method wininet which is now the default on windows.
       if (.Platform$OS.type == "windows") {
         tempfile <- file.path(tempdir(), "temp.txt")
