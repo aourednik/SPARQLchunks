@@ -113,11 +113,11 @@ sparql2df <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
 #' result_list <- sparql2list(endpoint, query)
 #' @export
 sparql2list <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
-  if (autoproxy) {
-    proxy_config <- autoproxyconfig(endpoint)
-  } else {
-    proxy_config <- httr::use_proxy(url = NULL)
-  }
+	proxy_config <- ifelse(
+		autoproxy,
+		autoproxyconfig(endpoint),
+		httr::use_proxy(url = NULL)
+	)
   acceptype <- "text/xml"
   outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
   tryCatch(
@@ -162,7 +162,7 @@ autoproxyconfig <- function(endpoint) {
 #' @param acceptype 'text/csv' or 'text/xml' (character)
 #' @param proxy_config Detected proxy configuration (list)
 #' @param auth Authentication Information (httr-authenticate-object)
-#' @returns The result of the SPARQL query as a list or, if this failes, failure message.
+#' @returns The result of the SPARQL query as a list or, if this fails, failure message.
 #' @examples endpoint <- "https://lindas.admin.ch/query"
 #' query <- "PREFIX schema: <http://schema.org/>
 #'   SELECT * WHERE {
