@@ -81,18 +81,18 @@ sparql2df <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
   outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
   out <- textConnection(outcontent$content)
   tryCatch(
-  	{
-  		df <- utils::read.csv(out)
-  	},
-  	error = function(e) {
-  		# utils::browseURL(outcontent$httpquery)
-  		stop(
-  			sprintf(
-  				"Reply from SPARQL endpoint received but could not convert it to a data.frame.\nVerify the query result in a web browser:\n%s",
-  				outcontent$httpquery
-  			)
-  		)
-  	}
+    {
+      df <- utils::read.csv(out)
+    },
+    error = function(e) {
+      # utils::browseURL(outcontent$httpquery)
+      stop(
+        sprintf(
+          "Reply from SPARQL endpoint received but could not convert it to a data.frame.\nVerify the query result in a web browser:\n%s",
+          outcontent$httpquery
+        )
+      )
+    }
   )
   return(df)
 }
@@ -226,8 +226,8 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
     }
   }
   return(list(
-  	content = outcontent,
-  	httpquery = qm
+    content = outcontent,
+    httpquery = qm
   ))
 }
 
