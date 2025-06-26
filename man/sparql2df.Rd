@@ -15,6 +15,9 @@ sparql2df(endpoint, query, autoproxy = FALSE, auth = NULL)
 
 \item{auth}{Authentication Information (httr-authenticate-object)}
 }
+\value{
+SPARQL query result in data.frame format
+}
 \description{
 Fetch data from a SPARQL endpoint and store the output in a dataframe
 }

@@ -2,8 +2,8 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "identifier": "SPARQLchunks",
-  "description": "Allows to run SPARQL chunks in R-markdown files. Also provides inline functions to send a SPARQL query to an endpoint and retrieve data in data frame or list form. ",
-  "name": "SPARQLchunks: Run SPARQL Chunks and Inline Functions to Retrieve Data",
+  "description": "Allows to run 'SPARQL' chunks in R-markdown files. Also provides inline functions to send a 'SPARQL' query to an endpoint and retrieve data in data frame or list form. ",
+  "name": "SPARQLchunks: Run 'SPARQL' Chunks and Inline Functions to Retrieve Data",
   "codeRepository": "https://github.com/aourednik/SPARQLchunks",
   "issueTracker": "https://github.com/aourednik/SPARQLchunks/issues",
   "license": "https://spdx.org/licenses/GPL-3.0",
@@ -44,6 +44,19 @@
         "url": "https://cran.r-project.org"
       },
       "sameAs": "https://CRAN.R-project.org/package=rmarkdown"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "testthat",
+      "name": "testthat",
+      "version": ">= 3.0.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=testthat"
     }
   ],
   "softwareRequirements": {
@@ -109,7 +122,7 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "22.922KB",
+  "fileSize": "24.002KB",
   "citation": [
     {
       "@type": "SoftwareSourceCode",
@@ -127,7 +140,8 @@
       "description": "R package version 0.3"
     }
   ],
-  "readme": "https://github.com/aourednik/SPARQLchunks/blob/master/README.md",
+  "readme": "https://github.com/aourednik/SPARQLchunks/blob/main/README.md",
+  "contIntegration": ["https://app.codecov.io/gh/aourednik/SPARQLchunks", "https://github.com/aourednik/SPARQLchunks/actions/workflows/R-CMD-check.yaml"],
   "developmentStatus": "https://lifecycle.r-lib.org/articles/stages.html#stable",
   "keywords": ["rstats", "rstats-package", "sparql"]
 }

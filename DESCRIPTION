@@ -8,7 +8,7 @@ Description: Allows to run 'SPARQL' chunks in R-markdown files. Also provides in
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.3.2
 Imports: 
     curl,
     httr,

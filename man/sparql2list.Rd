@@ -15,11 +15,13 @@ sparql2list(endpoint, query, autoproxy = FALSE, auth = NULL)
 
 \item{auth}{Authentication Information (httr-authenticate-object)}
 }
+\value{
+SPARQL query result in the form of a list
+}
 \description{
 Fetch data from a SPARQL endpoint and store the output in a list
 }
 \examples{
-library(SPARQLchunks)
 endpoint <- "https://lindas.admin.ch/query"
 query <- "PREFIX schema: <http://schema.org/>
   SELECT * WHERE {

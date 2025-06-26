@@ -19,42 +19,53 @@
 #' @family important functions
 #' @keywords documentation
 #' @export
-eng_sparql <- function(options) {
-  code <- paste(options$code, collapse = "\n")
-  ep <- options$endpoint
-  if (!is.null(options$autoproxy)) {
-    autoproxy <- options$autoproxy
-  } else {
-    autoproxy <- FALSE
-  }
-  if (!is.null(options$auth)) {
-    auth <- options$auth
-  } else {
-    auth <- FALSE
-  }
-  qm <- paste(ep, "?", "query", "=",
-    gsub("\\+", "%2B", utils::URLencode(code, reserved = TRUE)), "",
-    sep = ""
-  )
-  varname <- options$output.var
-  if (is.null(options$output.type)) {
-    output_type <- "dataframe"
-  } else {
-    output_type <- options$output.type
-  }
-  if (output_type == "list") {
-    out <- sparql2list(ep, code, autoproxy, auth)
-    nresults <- length(out$sparql$results)
-  } else {
-    out <- sparql2df(ep, code, autoproxy, auth)
-    nresults <- nrow(out)
-  }
-  chunkout <- ifelse(!is.null(varname), qm, out)
-  message(paste("The SPARQL query returned", nresults, "results"))
-  if (!is.null(varname)) {
-    assign(varname, out, envir = knitr::knit_global())
-  }
-  knitr::engine_output(options, options$code, chunkout)
+eng_sparql <- function(opts) {
+	code <- paste(opts$code, collapse = "\n")
+	if (!is.null(opts$endpoint)) {
+		ep <- opts$endpoint
+	} else {
+		stop("No endpoint defined")
+	}
+	if (!is.null(opts$autoproxy)) {
+		autoproxy <- opts$autoproxy
+	} else {
+		autoproxy <- FALSE
+	}
+	if (!is.null(opts$auth)) {
+		auth <- opts$auth
+	} else {
+		auth <- NULL # This needs to be NULL, not FALSE, or the call to sparql2list and sparql2df will generate chaotic errors
+	}
+	qm <- paste(ep, "?", "query", "=",
+							gsub("\\+", "%2B", utils::URLencode(code, reserved = TRUE)), "",
+							sep = ""
+	)
+	if (is.null(opts$output.type)) {
+		output_type <- "dataframe"
+	} else {
+		output_type <- opts$output.type
+	}
+	if (output_type == "list") {
+		out <- sparql2list(ep, code, autoproxy, auth)
+		nresults <- length(out$sparql$results)
+	} else {
+		out <- sparql2df(ep, code, autoproxy, auth)
+		nresults <- nrow(out)
+	}
+	if(F) {
+		varname <- opts$output.var
+		# chunkout <- ifelse(!is.null(varname), qm, out)
+		if (!is.null(varname)) {
+			chunkout <- qm
+		} else {
+			chunkout <- capture.output(print(out))  # ensures output is printable text
+		}
+		message(paste("The SPARQL query returned", nresults, "results"))
+		if (!is.null(varname)) {
+			assign(varname, out, envir = knitr::knit_global())
+		}
+		knitr::engine_output(opts, opts$code, chunkout)
+	}
 }
 
 #' Fetch data from a SPARQL endpoint and store the output in a dataframe
@@ -62,7 +73,7 @@ eng_sparql <- function(options) {
 #' @param query The SPARQL query (character)
 #' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
 #' @param auth Authentication Information (httr-authenticate-object)
-#' @returns SPARQL query result in data.frame format
+#' @return SPARQL query result in data.frame format
 #' @examples library(SPARQLchunks)
 #' endpoint <- "https://lindas.admin.ch/query"
 #' query <- "PREFIX schema: <http://schema.org/>
@@ -73,17 +84,27 @@ eng_sparql <- function(options) {
 #' result_df <- sparql2df(endpoint, query)
 #' @export
 sparql2df <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
-  if (autoproxy) {
-    proxy_config <- autoproxyconfig(endpoint)
-  } else {
-    proxy_config <- httr::use_proxy(url = NULL)
-  }
+	proxy_config <- ifelse(
+		autoproxy,
+		autoproxyconfig(endpoint),
+		httr::use_proxy(url = NULL)
+	)
   acceptype <- "text/csv"
   outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
-  out <- textConnection(outcontent$content)
+  tryCatch(
+  	content <- textConnection(outcontent$content),
+  	error = function(e) {
+  		stop(
+  			sprintf(
+  				"There is something wrong with the output content: %s",
+  				outcontent
+  			)
+  		)
+  	}
+  )
   tryCatch(
     {
-      df <- utils::read.csv(out)
+      df <- utils::read.csv(content)
     },
     error = function(e) {
       # utils::browseURL(outcontent$httpquery)
@@ -103,7 +124,7 @@ sparql2df <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
 #' @param query The SPARQL query (character)
 #' @param autoproxy Try to detect a proxy automatically (boolean). Useful on Windows machines behind corporate firewalls
 #' @param auth Authentication Information (httr-authenticate-object)
-#' @returns SPARQL query result in the form of a list
+#' @return SPARQL query result in the form of a list
 #' @examples endpoint <- "https://lindas.admin.ch/query"
 #' query <- "PREFIX schema: <http://schema.org/>
 #'   SELECT * WHERE {
@@ -118,42 +139,34 @@ sparql2list <- function(endpoint, query, autoproxy = FALSE, auth = NULL) {
 		autoproxyconfig(endpoint),
 		httr::use_proxy(url = NULL)
 	)
-  acceptype <- "text/xml"
+  acceptype <- "application/xml"
   outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config, auth)
   tryCatch(
+  	content <- outcontent$content,
+  	error = function(e) {
+  		stop(
+  			sprintf(
+  				"There is something wrong with the retrieved data: %s",
+  				outcontent
+  			)
+  		)
+  	}
+  )
+  tryCatch(
     {
-      list <- xml2::read_xml(outcontent$content) %>% xml2::as_list()
+      list <- xml2::as_list(
+      	xml2::read_xml(content)
+      )
     },
     error = function(e) {
       warning("Query could not be parsetd as xml. Returning unparsed query return values.")
-      list <- outcontent$content
+      list <- list(warning="non parsable", content=content)
     }
   )
+  # if (!is.list(list) || is.null(list$sparql)) {
+  # 	warning("The response is not a valid SPARQL XML result. Cannot parse.")
+  # }
   return(list)
-}
-
-#' Try to determine the proxy settings automatically
-#' @param endpoint The SPARQL endpoint (URL)
-#' @returns Confirmation of the proxy setting
-#' @examples endpoint <- "https://lindas.admin.ch/query"
-#' proxy_config <- autoproxyconfig(endpoint)
-autoproxyconfig <- function(endpoint) {
-  message("Trying to determine proxy parameters")
-  proxy_url <- tryCatch(
-    {
-      curl::ie_get_proxy_for_url(endpoint)
-    },
-    error = function(e) {
-      message("Automatic proxy detection with curl::curl::ie_get_proxy_for_url() failed.")
-      return(NULL)
-    }
-  )
-  if (!is.null(proxy_url)) {
-    message(paste("Using proxy:", proxy_url))
-  } else {
-    message(paste("No proxy found or needed to access the endpoint", endpoint))
-  }
-  return(httr::use_proxy(url = proxy_url))
 }
 
 #' Get the content from the endpoint
@@ -162,22 +175,17 @@ autoproxyconfig <- function(endpoint) {
 #' @param acceptype 'text/csv' or 'text/xml' (character)
 #' @param proxy_config Detected proxy configuration (list)
 #' @param auth Authentication Information (httr-authenticate-object)
-#' @returns The result of the SPARQL query as a list or, if this fails, failure message.
-#' @examples endpoint <- "https://lindas.admin.ch/query"
-#' query <- "PREFIX schema: <http://schema.org/>
-#'   SELECT * WHERE {
-#'   ?sub a schema:DataCatalog .
-#'   ?subtype a schema:DataType .
-#' }"
-#' acceptype <- "text/xml"
-#' proxy_config <- httr::use_proxy(url = NULL)
-#' outcontent <- get_outcontent(endpoint, query, acceptype, proxy_config)
+#' @return The result of the SPARQL query as a list or, if this fails, failure message.
+#' @noRd
 get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL) {
   qm <- paste(endpoint, "?", "query", "=",
     gsub("\\+", "%2B", utils::URLencode(query, reserved = TRUE)), "",
     sep = ""
   )
-  outcontent <- tryCatch(
+  message("Preparing to send query to: ", endpoint)
+  message("SPARQL string:\n", query)
+  message("Query URL:\n", qm )
+  content <- tryCatch(
     {
       out <- httr::GET(
         qm,
@@ -186,13 +194,18 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
         httr::add_headers(c(Accept = acceptype)),
         httr::user_agent("R client SPARQLChunks")
       )
-      httr::content(out, "text", encoding = "UTF-8")
+      if (out$status == 401) {warning(
+      	"Authentication required. Provide valid authentication with the auth parameter"
+      )} else {
+      	httr::warn_for_status(out)
+      }
+      httr::content(out, "text", encoding = "UTF-8") # Don't use return(...). If you use return(...) inside a block that is being assigned (x <- tryCatch({...})), you're exiting the function, not just returning a value for assignment.
     },
     error = function(e) {
       # @see https://github.com/r-lib/httr/issues/417
       # The download.file function in base R uses IE settings, including proxy password, when you use download
       # method wininet which is now the default on windows.
-      if (.Platform$OS.type == "windows") {
+      if (is_windows()) {
         tempfile <- file.path(tempdir(), "temp.txt")
         utils::download.file(qm,
           method = "wininet",
@@ -201,17 +214,16 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
         )
         temp <- paste(readLines(tempfile), collapse = "\n")
         unlink(tempfile)
-        return(temp)
+        temp
       }
     }
   )
-  if (nchar(outcontent) < 1) {
-    warning(paste0(
-      "First query attempt result is empty. Trying without '",
-      acceptype,
-      "' header. The result is not guaranteed to be a list."
-    ))
-    outcontent <- tryCatch(
+  if (is.null(content) || nchar(content) < 1) {
+    warning(
+    	sprintf("First query attempt result is empty. Trying without Accept=%s header. The result is not guaranteed to be a list.",
+    	acceptype)
+    )
+    content <- tryCatch(
       {
         out <- httr::GET(
           qm,
@@ -219,31 +231,66 @@ get_outcontent <- function(endpoint, query, acceptype, proxy_config, auth = NULL
           httr::timeout(60),
           httr::user_agent("R client SPARQLChunks")
         )
-        if (out$status == 401) {
-          warning("Authentication required. Provide valid authentication with the auth parameter")
-        } else {
+        if (out$status == 401) {warning(
+        	"Authentication required. Provide valid authentication with the auth parameter"
+        )} else {
           httr::warn_for_status(out)
         }
         httr::content(out, "text", encoding = "UTF-8")
       },
       error = function(e) {
-        if (.Platform$OS.type == "windows") {
+        if (is_windows()) {
           tempfile <- file.path(tempdir(), "temp.txt")
           utils::download.file(qm, method = "wininet", tempfile)
           temp <- paste(readLines(tempfile), collapse = "\n")
           unlink(tempfile)
-          return(temp)
+          temp
         }
       }
     )
-    if (nchar(outcontent) < 1) {
+    if (is.null(content) || nchar(content) < 1) {
       warning("The query result is still empty")
     }
   }
+  if (inherits(content, "response")) {
+  	if (httr::status_code(content) >= 400) {
+  		stop(sprintf("HTTP error %s: %s", httr::status_code(content), httr::http_status(content)$message))
+  	}
+  }
   return(list(
-    content = outcontent,
+    content = content,
     httpquery = qm
   ))
+}
+
+#' Try to determine the proxy settings automatically
+#' @param endpoint The SPARQL endpoint (URL)
+#' @return Confirmation of the proxy setting
+#' @noRd
+autoproxyconfig <- function(endpoint) {
+	message("Trying to determine proxy parameters")
+	proxy_url <- tryCatch(
+		{
+			curl::ie_get_proxy_for_url(endpoint)
+		},
+		error = function(e) {
+			message("Automatic proxy detection with curl::curl::ie_get_proxy_for_url() failed.")
+			return(NULL)
+		}
+	)
+	if (!is.null(proxy_url)) {
+		message(paste("Using proxy:", proxy_url))
+	} else {
+		message(paste("No proxy found, nor needed, to access the endpoint", endpoint))
+	}
+	return(httr::use_proxy(url = proxy_url))
+}
+
+#' Verify if platform is Windows
+#' @return TRUE if platform is Windows, FALSE otherwise
+#' @noRd
+is_windows <- function() {
+	.Platform$OS.type == "windows"
 }
 
 .onAttach <- function(libname, pkgname) {

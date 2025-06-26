@@ -1,12 +1,13 @@
 citHeader("To cite SPARQLchunks in publications, please use:")
 
-citEntry(
-  entry = "Manual",
-  title = "SPARQLChunks: Query SPARQL endpoints and run SPARQL chunks in R-markdown files.",
-  author = person("André", "Ourednik", email = "andre.ourednik@epfl.ch", role = c("aut", "cre")),
-  year = "2025",
-  note = "R package version 0.3",
-  url = "https://github.com/aourednik/SPARQLchunks"
+bibentry(
+  key = "sparqlchunks",
+  bibtype  = "Manual",
+  title    = "SPARQLChunks: Query SPARQL endpoints and run SPARQL chunks in R-markdown files",
+  author = c(person("André", "Ourednik")),
+  note  = "R package version 0.3",
+  year     = "2025",
+  url      = "https://github.com/aourednik/SPARQLchunks"
 )
 
 citFooter("Thank you for citing SPARQLchunks!")

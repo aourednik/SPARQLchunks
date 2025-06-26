@@ -4,6 +4,7 @@
 <!-- badges: start -->
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![Codecov test coverage](https://codecov.io/gh/aourednik/SPARQLchunks/graph/badge.svg)](https://app.codecov.io/gh/aourednik/SPARQLchunks)
+[![R-CMD-check](https://github.com/aourednik/SPARQLchunks/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aourednik/SPARQLchunks/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Coding in R is useless without interesting research questions; and even the best questions remain unanswered without data. RStudio provides a number of convenient ways to access data, among which the possibility to write SQL code chunks in Rmarkdown, to run these chunks and to assign the value of the query result directly to a variable of your choice. No such thing is available yet for SPARQL queries: the ones that allow you to navigate gigantic knowledge graphs that incarnate the conscience of the semantic web. This is where the SPARQLchunks package steps in. 
