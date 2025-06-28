@@ -10,8 +10,8 @@
 #'
 #' @description Pointing knitr to this function alows you to run SPARQL chunks from R Markdown: `knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)`. Usage is internal.
 #' @usage eng_sparql(options)
-#' @param options Chunk options, as provided by \code{knitr} during chunk execution. Chunk option for this is \code{sparql}
-#' @return Data in dataframe or list form (depending on options)
+#' @param opts Chunk options, as provided by \code{knitr} during chunk execution. Chunk option for this is \code{sparql}. Note that we avoid calling this "options" to avoid conflict with an R system function name.
+#' @return Data in dataframe or list form (depending on options). The function only returns when no output.var to store its result into is defined.
 #' @author [André Ourednik](https://ourednik.info)
 #' @examples library(SPARQLchunks)
 #' knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)
@@ -36,9 +36,10 @@ eng_sparql <- function(opts) {
 	} else {
 		auth <- NULL # This needs to be NULL, not FALSE, or the call to sparql2list and sparql2df will generate chaotic errors
 	}
-	qm <- paste(ep, "?", "query", "=",
-							gsub("\\+", "%2B", utils::URLencode(code, reserved = TRUE)), "",
-							sep = ""
+	qm <- paste(
+		ep, "?", "query", "=",
+		gsub("\\+", "%2B", utils::URLencode(code, reserved = TRUE)), "",
+		sep = ""
 	)
 	if (is.null(opts$output.type)) {
 		output_type <- "dataframe"
@@ -52,20 +53,21 @@ eng_sparql <- function(opts) {
 		out <- sparql2df(ep, code, autoproxy, auth)
 		nresults <- nrow(out)
 	}
-	if(F) {
-		varname <- opts$output.var
-		# chunkout <- ifelse(!is.null(varname), qm, out)
-		if (!is.null(varname)) {
-			chunkout <- qm
-		} else {
-			chunkout <- capture.output(print(out))  # ensures output is printable text
-		}
-		message(paste("The SPARQL query returned", nresults, "results"))
-		if (!is.null(varname)) {
-			assign(varname, out, envir = knitr::knit_global())
-		}
-		knitr::engine_output(opts, opts$code, chunkout)
+	varname <- opts$output.var
+	# chunkout <- ifelse(!is.null(varname), qm, out)
+	if (!is.null(varname)) {
+		chunkout <- qm
+	} else {
+		chunkout <- capture.output(print(out))  # ensures output is printable text
 	}
+	message(paste("The SPARQL query returned", nresults, "results"))
+	if (!is.null(varname)) {
+		assign(varname, out, envir = knitr::knit_global())
+	} else {
+		warning("No output variable defined")
+		return(out)
+	}
+	knitr::engine_output(opts, opts$code, chunkout)
 }
 
 #' Fetch data from a SPARQL endpoint and store the output in a dataframe

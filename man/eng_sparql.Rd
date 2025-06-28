@@ -7,7 +7,7 @@
 eng_sparql(options)
 }
 \arguments{
-\item{options}{Chunk options, as provided by \code{knitr} during chunk execution. Chunk option for this is \code{sparql}}
+\item{opts}{Chunk options, as provided by \code{knitr} during chunk execution. Chunk option for this is \code{sparql}. Note that we avoid calling this "options" to avoid conflict with an R system function name.}
 }
 \value{
 Data in dataframe or list form (depending on options)

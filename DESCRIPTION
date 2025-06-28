@@ -13,12 +13,12 @@ Imports:
     curl,
     httr,
     knitr,
-    magrittr,
     xml2
 VignetteBuilder: knitr
 Suggests: 
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    mockery
 URL: https://github.com/aourednik/SPARQLchunks
 BugReports: https://github.com/aourednik/SPARQLchunks/issues
 Config/testthat/edition: 3

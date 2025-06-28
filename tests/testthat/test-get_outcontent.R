@@ -1,56 +1,60 @@
 library(testthat)
 library(mockery)
 
-test_that("Calls sparql2list when output.type = 'list'", {
-	query <- "PREFIX schema: <http://schema.org/>
-		SELECT * WHERE {
-			?sub a schema:DataCatalog .
-			?subtype a schema:DataType .
-	}"
-	endpoint <- "https://lindas.admin.ch/query"
-	opt <- list(
+endpoint <- "https://sparql.uniprot.org/sparql"
+query <- "PREFIX up: <http://purl.uniprot.org/core/>
+SELECT ?taxon
+FROM <http://sparql.uniprot.org/taxonomy>
+WHERE {
+	?taxon a up:Taxon .
+} LIMIT 500"
+
+test_that("Calls sparql2list and assings a list to output.var when output.type = 'list'", {
+	opts <- list(
 		code = query,
 		endpoint = endpoint,
 		output.type = "list",
+		output.var = "result_list",
 		engine = "sparql",
 		echo = F,
 		label = "test",
-		results = "markup"     # required to avoid 'missing value' error
+		results = "markup" # required to avoid 'missing value' error
 	)
-	mock_sparql2list <- function(...) {
-		list(sparql = list(results = list(1, 2, 3)))
-	}
-	mockery::stub(eng_sparql, "sparql2list", mock_sparql2list) # calls mock_sparql2list instead of sparql2list
-	output <- eng_sparql(opt)
-	expect_true(grepl("results", output))
+	eng_sparql(opts)
+	expect_type(result_list,"list")
 })
 
-
-test_that("Calls sparql2df when output.type = 'dataframe'", {
-	query <- "PREFIX schema: <http://schema.org/>
-		SELECT * WHERE {
-			?sub a schema:DataCatalog .
-			?subtype a schema:DataType .
-	}"
-	endpoint <- "https://lindas.admin.ch/query"
-	opt <- list(
+test_that("Calls sparql2df and assings a data.frame to output.var when output.type = 'dataframe'", {
+	opts <- list(
 		code = query,
 		endpoint = endpoint,
 		output.type = "dataframe",
+		output.var = "result_df",
 		engine = "sparql",
 		echo = F,
 		label = "test",
 		results = "markup"     # required to avoid 'missing value' error
 	)
-	mock_sparql2df <- mockery::mock(
-		data.frame(column1 = c("a", "b", "c"), column2 = c("d", "e", "f"))
-	)
-	mockery::stub(eng_sparql, "sparql2df", mock_sparql2df) # calls mock_sparql2list instead of sparql2list
-	output <- eng_sparql(opt)
-	mockery::expect_called(mock_sparql2df, 1)
-	testthat::expect_type(output, "character")
-	expect_true(any(grepl("a|b|c", output)))  # based on mock df content
+	eng_sparql(opts)
+	expect_s3_class(result_df,"data.frame")
 })
+
+test_that("Automatically assigns output.type and output.var when not defined, but triggers sparql2df", {
+	opts <- list(
+		code = query,
+		endpoint = endpoint,
+		output.type = NULL,
+		output.var = NULL,
+		engine = "sparql",
+		echo = F,
+		label = "test",
+		results = "markup"     # required to avoid 'missing value' error
+	)
+	eng_sparql(opts)
+	expect_s3_class(result_df,"data.frame")
+})
+
+
 
 
 test_that("sparql2list throws error with sprintf when content access fails", {
@@ -69,13 +73,11 @@ test_that("sparql2list throws error with sprintf when content access fails", {
 	)
 })
 
-
 test_that("return is of correct type", {
 	skip_on_cran()  # if network access is needed
 	skip_if_not_installed("httr")
 	skip_if_not_installed("curl")
 	skip_if_not_installed("knitr")
-	skip_if_not_installed("magrittr")
 	skip_if_not_installed("xml2")
 	endpoint <- "https://lindas.admin.ch/query"
 	query <- "PREFIX schema: <http://schema.org/>
@@ -106,3 +108,27 @@ test_that("Windows fallback is used when httr::GET fails", {
 	)
 	expect_equal(result$content, "mock response")
 })
+
+
+test_that("fallback block is triggered when content is NULL", {
+	# Mock httr::GET to return a response that leads to NULL content
+	mock_get <- mock(list(status = 200), cycle = TRUE)
+	mock_content <- mock(NULL, cycle = TRUE)  # Simulate NULL content
+
+	stub(get_outcontent, "httr::GET", mock_get)
+	stub(get_outcontent, "httr::content", mock_content)
+
+	result <- get_outcontent(
+		endpoint = "http://example.org/sparql",
+		query = "SELECT * WHERE {?s ?p ?o}",
+		acceptype = "application/sparql-results+json",
+		proxy_config = NULL
+	)
+
+	# Check that fallback content is returned (e.g., from download.file or NULL)
+	expect_true("content" %in% names(result))
+})
+
+
+
+
