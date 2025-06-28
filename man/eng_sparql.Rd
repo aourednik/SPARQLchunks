@@ -4,13 +4,13 @@
 \alias{eng_sparql}
 \title{Add \code{sparql} as knit-engine to knitr package}
 \usage{
-eng_sparql(options)
+eng_sparql(opts)
 }
 \arguments{
 \item{opts}{Chunk options, as provided by \code{knitr} during chunk execution. Chunk option for this is \code{sparql}. Note that we avoid calling this "options" to avoid conflict with an R system function name.}
 }
 \value{
-Data in dataframe or list form (depending on options)
+Data in dataframe or list form (depending on opts). The function only returns when no output.var to store its result into is defined.
 }
 \description{
 Pointing knitr to this function alows you to run SPARQL chunks from R Markdown: \code{knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)}. Usage is internal.

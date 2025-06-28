@@ -3,3 +3,4 @@
 export(eng_sparql)
 export(sparql2df)
 export(sparql2list)
+importFrom(utils,capture.output)

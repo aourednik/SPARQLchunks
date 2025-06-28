@@ -9,15 +9,16 @@
 #' This will be set within an R Markdown document's setup chunk. Do not use eng_sparql function elsewhere.
 #'
 #' @description Pointing knitr to this function alows you to run SPARQL chunks from R Markdown: `knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)`. Usage is internal.
-#' @usage eng_sparql(options)
+#' @usage eng_sparql(opts)
 #' @param opts Chunk options, as provided by \code{knitr} during chunk execution. Chunk option for this is \code{sparql}. Note that we avoid calling this "options" to avoid conflict with an R system function name.
-#' @return Data in dataframe or list form (depending on options). The function only returns when no output.var to store its result into is defined.
+#' @return Data in dataframe or list form (depending on opts). The function only returns when no output.var to store its result into is defined.
 #' @author [André Ourednik](https://ourednik.info)
 #' @examples library(SPARQLchunks)
 #' knitr::knit_engines$set(sparql = SPARQLchunks::eng_sparql)
 #' @references André Ourednik (2021). Execute SPARQL chunks in Rmarkdown Available at:  https://ourednik.info/maps/2021/12/14/execute-sparql-chunks-in-r-markdown/
 #' @family important functions
 #' @keywords documentation
+#' @importFrom utils capture.output
 #' @export
 eng_sparql <- function(opts) {
 	code <- paste(opts$code, collapse = "\n")
