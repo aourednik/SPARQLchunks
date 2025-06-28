@@ -4,3 +4,4 @@
 ^dev$
 ^\.github$
 ^codemeta\.json$
+^cran-comments\.md$
