@@ -19,6 +19,6 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     mockery
-URL: https://github.com/aourednik/SPARQLchunks
+URL: https://github.com/aourednik/SPARQLchunks, https://aourednik.github.io/SPARQLchunks/
 BugReports: https://github.com/aourednik/SPARQLchunks/issues
 Config/testthat/edition: 3

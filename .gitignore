@@ -5,3 +5,6 @@ inst/doc
 .Renviron
 .httr-oauth
 .DS_Store
+/doc/
+/Meta/
+docs
