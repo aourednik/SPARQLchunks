@@ -1,4 +1,9 @@
 library(testthat)
+skip_on_cran()  # network access is needed for this package to work
+skip_if_not_installed("httr")
+skip_if_not_installed("curl")
+skip_if_not_installed("knitr")
+skip_if_not_installed("xml2")
 library(mockery)
 
 endpoint <- "https://sparql.uniprot.org/sparql"
@@ -55,8 +60,6 @@ test_that("Automatically assigns output.type and output.var when not defined, bu
 })
 
 
-
-
 test_that("sparql2list throws error with sprintf when content access fails", {
 	# Force get_outcontent to return a string instead of list
 	broken_outcontent <- "not_a_list"
@@ -68,17 +71,12 @@ test_that("sparql2list throws error with sprintf when content access fails", {
 	mockery::stub(sparql2list, "get_outcontent", mock_get_outcontent)
 
 	expect_error(
-		sparql2list("http://example.org", "SELECT * WHERE {?s ?p ?o}"),
+		sparql2list("https://lindas.admin.ch/query", "SELECT * WHERE {?s ?p ?o}"),
 		regexp = "There is something wrong with the retrieved data: not_a_list"
 	)
 })
 
 test_that("return is of correct type", {
-	skip_on_cran()  # if network access is needed
-	skip_if_not_installed("httr")
-	skip_if_not_installed("curl")
-	skip_if_not_installed("knitr")
-	skip_if_not_installed("xml2")
 	endpoint <- "https://lindas.admin.ch/query"
 	query <- "PREFIX schema: <http://schema.org/>
 	   SELECT * WHERE {
@@ -101,8 +99,8 @@ test_that("Windows fallback is used when httr::GET fails", {
 	stub(get_outcontent, "readLines", function(...) "mock response")
 	stub(get_outcontent, "unlink", function(...) invisible(NULL))
 	result <- get_outcontent(
-		endpoint = "http://example.org/sparql",
-		query = "SELECT * WHERE {?s ?p ?o}",
+		endpoint = "https://lindas.admin.ch/query",
+		query = "SELECT * WHERE {?s ?p ?o} LIMIT 10",
 		acceptype = "application/sparql-results+json",
 		proxy_config = NULL
 	)
@@ -119,8 +117,8 @@ test_that("fallback block is triggered when content is NULL", {
 	stub(get_outcontent, "httr::content", mock_content)
 
 	result <- get_outcontent(
-		endpoint = "http://example.org/sparql",
-		query = "SELECT * WHERE {?s ?p ?o}",
+		endpoint = "https://lindas.admin.ch/query",
+		query = "SELECT * WHERE {?s ?p ?o} LIMIT 10",
 		acceptype = "application/sparql-results+json",
 		proxy_config = NULL
 	)

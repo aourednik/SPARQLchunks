@@ -63,7 +63,9 @@ eng_sparql <- function(opts) {
 	}
 	message(paste("The SPARQL query returned", nresults, "results"))
 	if (!is.null(varname)) {
-		assign(varname, out, envir = knitr::knit_global())
+		# if (isTRUE(getOption("knitr.in.progress"))) { # only do this when knitting to avoid CRAN autocheck problems
+			assign(varname, out, envir = knitr::knit_global())
+		# }
 	} else {
 		warning("No output variable defined")
 		return(out)
